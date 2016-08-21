@@ -1,0 +1,25 @@
+
+MapMatch  判断车在哪条路上行驶
+
+匹配到12年时config.dat
+./Data/mapIndex.txt
+./Data/NextLineResult.txt
+./Data/submap/submap
+./testoutput/
+
+
+匹配到10年地图上
+./Data/tbindex.txt
+./Data/tb.txt
+./Data/submap2/submap
+./testoutput/
+
+
+匹配到14年地图
+./Data/mapIndex.txt
+./Data/NextLineResult.txt
+./Data/submap2014/submap
+./testoutput1/
+
+LM  单机 加上路链ID
+GPSRevise mapreduce   修正GPS

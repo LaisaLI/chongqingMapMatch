@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/src/grid/DomParseService.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/grid/JGrid.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/match/LineConnect.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/match/Nearline.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/match/countLine.java" charset="GBK" />
+    <file url="PROJECT" charset="GBK" />
+  </component>
+</project>
