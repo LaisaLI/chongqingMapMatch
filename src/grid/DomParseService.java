@@ -191,11 +191,12 @@ public class DomParseService {
     	int position = 0;
     	ArrayList<GpsPoint> points = line.getPointArray();
     	
-    	double Xoff = 0.05; double Yoff = 0.03;//此处阀值为了见此计算次数
+    	double Xoff = 0.05; double Yoff = 0.03;//此处阀值为了减少计算次数
     	for(int i = 0;i<points.size();i++){
     		
     		Xtemp = Math.abs(points.get(i).getX() - X);
     		Ytemp = Math.abs(points.get(i).getY() - Y);
+			//lyl：通过增加一个xoff和yoff的判断筛掉一些确定距离比较大的点，减少计算次数
     		if(Xoff <= Xtemp && Yoff <= Ytemp) continue;
     		else if(Xoff > Xtemp && Yoff > Ytemp){
     			Xoff = Xtemp;
@@ -214,13 +215,14 @@ public class DomParseService {
     			}
     		}
     	}
-    	disTemp = distance*distance;
+    	disTemp = distance*distance;//lyl:此时将距离路链中最近的点选出，之后再计算到路链的距离
     	if(position != 0){
     		double preDis,pre,preDisTwice,preTwice;
     		preDis = DistanceP2P.GetDistance(X, Y, points.get(position-1).getX(), points.get(position-1).getY());
     		pre = DistanceP2P.GetDistance(points.get(position).getX(), points.get(position).getY(), points.get(position-1).getX(), points.get(position-1).getY());
     		preDisTwice = preDis*preDis;
     		preTwice = pre*pre;
+			//lyl:如果不是钝角三角形，即点p的投影落在线段内的话，计算点到边的垂直距离
     		if(!(disTemp > (preTwice+preDisTwice)||preDisTwice >(preTwice+disTemp))) preDistance = getOVD(preDis,distance,pre);
     	}
     	
@@ -240,6 +242,7 @@ public class DomParseService {
     	//System.out.println("The distance of point(" + X + "," + Y + ") to line " + line.getID() + " is " + distance);
     	return distance;
     }
+	//lyl:已知三角形的三条边的长度，求高
 	 private double getOVD(double a,double b,double obj){
 		 double p = (a+b+obj)/2;
 		 return Math.sqrt(p*(p-a)*(p-b)*(p-obj))*2/obj;

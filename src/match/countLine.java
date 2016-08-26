@@ -94,14 +94,20 @@ public class countLine {
 			count(currentPoint, errorFlag);
 		}
 	}
-	
+
+	//lyl:不懂！--tag--
 	private final int isPointNormal(GpsPointOfCar c, GpsPointOfCar p, GpsPointOfCar n)
 	{
 		double pToc, nToc, pTon;
 		pToc = nToc = pTon = -1;
-		if (p != null) pToc = DistanceP2P.GetDistance(c.getJD(), c.getWD(), p.getJD(), p.getWD());
-		if (n != null) nToc = DistanceP2P.GetDistance(c.getJD(), c.getWD(), n.getJD(), n.getWD());
-		if (p != null && n != null) pTon = DistanceP2P.GetDistance(n.getJD(), n.getWD(), p.getJD(), p.getWD());
+//		if (p != null) pToc = DistanceP2P.GetDistance(c.getJD(), c.getWD(), p.getJD(), p.getWD());
+//		if (n != null) nToc = DistanceP2P.GetDistance(c.getJD(), c.getWD(), n.getJD(), n.getWD());
+//		if (p != null && n != null) pTon = DistanceP2P.GetDistance(n.getJD(), n.getWD(), p.getJD(), p.getWD());
+		//lyl:增加了*3600000，DistanceP2P.GetDistance传入的参数应该是普通的经纬度。
+		if (p != null) pToc = DistanceP2P.GetDistance(c.getJD()*3600000, c.getWD()*3600000, p.getJD()*3600000, p.getWD()*3600000);
+		if (n != null) nToc = DistanceP2P.GetDistance(c.getJD()*3600000, c.getWD()*3600000, n.getJD()*3600000, n.getWD()*3600000);
+		if (p != null && n != null) pTon = DistanceP2P.GetDistance(n.getJD()*3600000, n.getWD()*3600000, p.getJD()*3600000, p.getWD()*3600000);
+		//System.out.println(pToc+","+pTon+","+nToc);
 		if (p != null && n != null && pToc + nToc > 20 * pTon) return 1;
 		if (p != null && pToc > 50) return 2;
 		return 0;
@@ -185,7 +191,7 @@ public class countLine {
 		TimePicker.t2 += System.currentTimeMillis() - t2;
 	}
 		
-	
+	//lyl:作用是什么？
 	private void errorPrint(String path, GpsPointOfCar p) throws IOException
 	{
 		//System.out.println("3333333333333333333333333334");
@@ -294,6 +300,7 @@ public class countLine {
 		TimePicker.t7 += System.currentTimeMillis() - t0;
 		
 	}
+
 	
 	
 	public HashMap<Long, Double> getConnection(GpsPointOfCar _g)
@@ -320,10 +327,12 @@ public class countLine {
 			ArrayList<Long> nextLine = null; 
 			String sNode = Snodes.get(lineId); 
 			String node = null;
-			
+
+			//如果该line是双向的，则snode包括两个，用空格隔开
 			if (sNode.contains(" "))
 			{
 				node = sNode.split(" ")[0];
+				//lyl:如果从路链同一端点进出并且进出时间间隔小于30秒即判断EnterError,并返回true
 				if (!isEnterError(lineId, node))
 				{
 					nextLine = nloper.getNextLine(node);
@@ -349,6 +358,7 @@ public class countLine {
 				node = sNode.split(" ")[1];
 			}
 			else node = sNode;
+			//lyl:如果从路链同一端点进出并且进出时间间隔小于30秒即判断EnterError,并返回true
 			if (!isEnterError(lineId, node))
 			{
 				nextLine = nloper.getNextLine(node);
@@ -642,6 +652,8 @@ public class countLine {
 				{
 					if (counting != null)
 					{
+						//t通过一个null点，使轨迹断开，当开启一个新的点时，和上一个点没有联系，不执行counting？。
+						counting.add(null);
 						counting.printLine(path);
 						counting = null;
 					}
