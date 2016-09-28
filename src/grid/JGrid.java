@@ -59,8 +59,8 @@ public class JGrid
 			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,484822,484823,484824,0,0,0,0,0,0,0,0,0,0,0,0,0},
 	};
 	public static final int NUM_OF_SUBMAP = 50;
-	public static final int X_NUM_OF_MAP = 17;
-	public static final int Y_NUM_OF_MAP = 20;
+	public static final int X_NUM_OF_MAP = 40;
+	public static final int Y_NUM_OF_MAP = 50;
 	public static final double J_START_X = 105.25;
 	public static final double J_START_Y = 28.08333;
 	public static final double J_MAP_X = 0.125;

@@ -17,13 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Stack;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -56,7 +52,14 @@ public class countLine {
 	private GpsPointOfCar pastPoint = null;
 	private GpsPointOfCar currentPoint = null;
 	private GpsPointOfCar nextPoint = null;
-	
+	private int lineNumber = 0;
+	private static LinkIdLonNLatReader linkIdLNL = new LinkIdLonNLatReader();//通过建立nodeIdLonNLatReader的对象来获得nodeId与其对应经纬度的Map
+
+
+
+
+
+
 	//private disP2L dpl = null; 
 	private Nearline nearLine = null; // get the lines around the GpsPointOfCar
 	public countLine(String _carId, String _beginTime, String _endTime, NextLineOper _nlo)
@@ -271,28 +274,36 @@ public class countLine {
 		}
 		
 		//根据栈所存在的位置在list中寻找LineConnect对象，输出到文件
-		FileWriter fileWriter = new FileWriter(fileName, true);
+		FileWriter fileWriter = new FileWriter(fileName+".csv", true);
+		FileWriter fileWriterWithLonNLat = new FileWriter(fileName+"withLL.csv",true);
 		
 		fileWriter.write(carId + "," + beginTime + "," + endTime + "," + numOfLine + "," + startLine + "," + endLine  + "\n");
 		
 		
 		//lineID,beginTime,endTime
 		fileWriter.write(startLine + ",0," + beginTime + ",");
+		//在另一个文件中将link对应的经纬度信息给出
+		fileWriterWithLonNLat.write(carId+","+startLine + ",0," +linkIdLNL.getLonNLatAsString(startLine+"")+","+beginTime + ",");
 		while (!stackOfPosInList.empty())
 		{
 			int i = stackOfPosInList.pop();
 			LineConnect lineConnect = list.get(i);
 			fileWriter.write(sdf.format(lineConnect.seprateTime) + "\n");
+			fileWriterWithLonNLat.write(sdf.format(lineConnect.seprateTime) + "\n");
 			/*for (int i1 = 0; i1 < lineConnect.i; i1++)
 			{
 				fileWriter.write(lineConnect.LineCross[i1] + "," + sdf.format(lineConnect.seprateTime) + "," + sdf.format(lineConnect.seprateTime) + "\n");
 			}*/
 			fileWriter.write(lineConnect.LineIdEnd + "," + lineConnect.errorSymbol + "," + sdf.format(lineConnect.seprateTime) + ",");
+			fileWriterWithLonNLat.write(carId+","+lineConnect.LineIdEnd + "," + lineConnect.errorSymbol + "," +linkIdLNL.getLonNLatAsString(lineConnect.LineIdEnd+"")+ "," + sdf.format(lineConnect.seprateTime) + ",");
 			//System.out.println(lineConnect.LineIdBegin + " " + lineConnect.LineIdEnd);
-		} 
+//			fileWriterWithLonNLat.write(lineNumber+","+lineConnect.LineIdEnd+","+lineConnect.errorSymbol+",");
+		}
 		fileWriter.write(endTime + "\n");
-		
+		fileWriterWithLonNLat.write(endTime + "\n");
+
 		fileWriter.close();
+		fileWriterWithLonNLat.close();
 		list.clear();
 		if (pastMap != null) pastMap.clear();
 		if (currentMap != null) currentMap.clear();
@@ -556,6 +567,7 @@ public class countLine {
 //	//System.out.println(System.currentTimeMillis());
 //	}
 
+
 	
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
@@ -603,6 +615,10 @@ public class countLine {
 		//ZipData zd = new ZipData();
 		PATH = "./Data/GPSData/data/";//////////
 		//PATH ="C://Users//Administrator//Desktop//data//";
+
+
+
+
 		File folder = new File(PATH);
 		System.out.println(folder.getAbsolutePath());
 		String[] files = folder.list();
@@ -611,19 +627,20 @@ public class countLine {
 			//macOS可能会存在一些隐藏文件，例如.DS_Store
 			if(!files[i].startsWith("."))
 			{
-				String carID = files[i].substring(0, files[i].indexOf('-'));
+//				String carID = files[i].substring(0, files[i].indexOf('-'));
 				//if (!can.contains(carID)) continue;
 				System.out.println(System.currentTimeMillis());
 					//ZipEntry ze = zd.getNextEntry();
 					{
 						GZIPInputStream is = null;   
 			            is = new GZIPInputStream(new FileInputStream(PATH + files[i]));
-						countLine.m(is, nextLineOper, "./Data/GPSData/result/" +  carID + ".csv");///////////
+						String fileName = files[i].substring(0,files[i].indexOf("."));
+						countLine.m(is, nextLineOper, "./Data/GPSData/result/"+fileName);///////////
 						is.close();
 					}
 			}
 			
-			
+
 		}
 	//TimePicker.print();
 	//System.out.println(System.currentTimeMillis());
@@ -652,7 +669,7 @@ public class countLine {
 				{
 					if (counting != null)
 					{
-						//t通过一个null点，使轨迹断开，当开启一个新的点时，和上一个点没有联系，不执行counting？。
+						//lyl:通过一个null点，使轨迹断开，当开启一个新的点时，和上一个点没有联系，不执行add函数中的counting()函数
 						counting.add(null);
 						counting.printLine(path);
 						counting = null;

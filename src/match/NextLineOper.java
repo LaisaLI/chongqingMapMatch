@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class NextLineOper {
-	public static int LINE = 43;
+	public static int LINE = 62;//LYLï¼šä»£è¡¨NextLineResultå‡½æ•°ä¸€è¡Œçš„å­—ç¬¦æ•°ï¼Œæ²¡æœ‰ç»çº¬åº¦çš„æ˜¯43ï¼Œæœ‰ç»çº¬åº¦çš„æ˜¯62
 	private String path1,path2;
 	private File f1;
 	private String preGridId = null;
@@ -21,13 +21,14 @@ public class NextLineOper {
 	private HashMap<String, ArrayList<Long>> record = null;
 	private ArrayList<Long> arl= null;
 	RandomAccessFile raf = null;
+	//è¿™ä¸ªæ„é€ å‡½æ•°æœªè¢«ä½¿ç”¨
 	public NextLineOper() throws FileNotFoundException{
 		//this.path1 = "E:/Data/mapIndex.txt";///////////
 		//this.path2 = "E:/Data/NextLineResult.txt";///////////
 	//	this.path1 = "D:/EclipseWS/MapMatch/Data/mapIndex.txt";///////////
 	//	this.path2 = "D:/EclipseWS/MapMatch/Data/NextLineResult.txt";///////////
-		this.path1 = "G://Workplace//MapMatch//Data//mapIndex.txt";//ÒÑ¸ÄÎª´ÓconfigÎÄ¼şÖĞ¶ÁÈ¡
-		this.path2 = "G://Workplace//MapMatch//Data//NextLineResult.txt";//ÒÑ¸ÄÎª´ÓconfigÎÄ¼şÖĞ¶ÁÈ¡
+		this.path1 = "G://Workplace//MapMatch//Data//mapIndex.txt";//ï¿½Ñ¸ï¿½Îªï¿½ï¿½configï¿½Ä¼ï¿½ï¿½Ğ¶ï¿½È¡
+		this.path2 = "G://Workplace//MapMatch//Data//NextLineResult.txt";//ï¿½Ñ¸ï¿½Îªï¿½ï¿½configï¿½Ä¼ï¿½ï¿½Ğ¶ï¿½È¡
 		
 		loadWorkMap();
 		raf = new RandomAccessFile(path2,"r");
@@ -40,8 +41,8 @@ public class NextLineOper {
 		raf = new RandomAccessFile(path2,"r");
 		record = new HashMap<String, ArrayList<Long>>();
 	}
-	//Éú³É¹¤×÷¹şÏ£±í
-	//¹Ø¼ü×Ö£¬ÎÄ¼şÖĞµÄÆ«ÒÆÖµ
+	//ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Ï£ï¿½ï¿½
+	//ï¿½Ø¼ï¿½ï¿½Ö£ï¿½ï¿½Ä¼ï¿½ï¿½Ğµï¿½Æ«ï¿½ï¿½Öµ
 	public void loadWorkMap(){
 		String temp;
 		map = new HashMap<String,Integer>(256);
@@ -58,7 +59,7 @@ public class NextLineOper {
 		}
 		//return map;
 	}
-	//·µ»ØÒ»¸öScannerÁ÷
+	//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Scannerï¿½ï¿½
 	public Scanner openFile(String path){
 		Scanner scanner = null;
 		f1 = new File(path);
@@ -67,7 +68,7 @@ public class NextLineOper {
 				scanner = new Scanner(new FileReader(f1));
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
-				System.out.println(path + "´ò¿ªÊ§°Ü£¡" + "----" + e.toString());
+				System.out.println(path + "ï¿½ï¿½Ê§ï¿½Ü£ï¿½" + "----" + e.toString());
 			}
 		}
 		return scanner;
@@ -97,7 +98,7 @@ public class NextLineOper {
 			System.out.println("OK!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.out.println(sPath + "´ò¿ªÊ§°Ü£¡" + "----" + e.toString());
+			System.out.println(sPath + "ï¿½ï¿½Ê§ï¿½Ü£ï¿½" + "----" + e.toString());
 		}
 	}*/
 	
@@ -106,10 +107,10 @@ public class NextLineOper {
 	public long twoDivide(String _node) throws IOException
 	{
 		if (_node.length() < 7) return -1;
-		int posInArl = map.get(_node.substring(0, 6));//posInArl¼ÇÂ¼submapµÄÎ»ÖÃ£»
+		int posInArl = map.get(_node.substring(0, 6));//posInArlï¿½ï¿½Â¼submapï¿½ï¿½Î»ï¿½Ã£ï¿½
 		if (preGridId != null && !preGridId.equals(_node.substring(0, 6))) record.clear();
 		Long node = Long.parseLong(_node);
-		long font = arl.get(posInArl);//font¼ÇÂ¼submapÖĞnodeµÄ¸öÊı£»
+		long font = arl.get(posInArl);//fontï¿½ï¿½Â¼submapï¿½ï¿½nodeï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½
 		long tail =  0;
 		//long offset = 0;
 		if (posInArl == arl.size() - 1)
@@ -123,7 +124,7 @@ public class NextLineOper {
 		long mid = 0;
 		
 		if (node > getNodeId(tail * LINE)) return -1;
-		//ÕÒ³ökÊ¹µÃgetNodeId(k*LINE)>=node>getNodeId((k-1)*LINE)
+		//ï¿½Ò³ï¿½kÊ¹ï¿½ï¿½getNodeId(k*LINE)>=node>getNodeId((k-1)*LINE)
 		while (font < tail)
 		{
 			mid = (font + tail) / 2;
@@ -174,7 +175,7 @@ public class NextLineOper {
 		long offset = 0;
 		if (Snode != null)
 		{
-			offset = twoDivide(Snode);//¶ş·ÖËÑË÷
+			offset = twoDivide(Snode);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		}
 		else offset = -1;
 		//System.out.println(offset);
@@ -220,7 +221,7 @@ public class NextLineOper {
 			//raf.close();
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.out.println(sPath + "´ò¿ªÊ§°Ü£¡" + "----" + e.toString());
+			System.out.println(sPath + "ï¿½ï¿½Ê§ï¿½Ü£ï¿½" + "----" + e.toString());
 		}
 		return result;
 	}

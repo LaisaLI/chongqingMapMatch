@@ -142,7 +142,7 @@ public class CarInfoReader {
 	//判断tripId是不是相同
 	public boolean isTheSameCar(String _carId, Date d) throws ParseException
 	{
-		if (carId.equals(_carId) && Math.abs(sdf.parse(currentTime).getTime() - d.getTime()) <= 10000) return true;
+		if (carId.equals(_carId) && Math.abs(sdf.parse(currentTime).getTime() - d.getTime()) <= 100000) return true;
 		else return false;
 	}
 	
