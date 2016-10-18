@@ -115,7 +115,7 @@ public class countLine {
 		if (p != null && pToc > 50) return 2;
 		return 0;
 	}
-	
+	//lyl:count函数得到gps点附近的currentMap（linkID以及到这个路的距离），同时调用getConnection通过和pastMap的连接完成对点的可能的路线的规划。
 	public void count(GpsPointOfCar _g, int errorFlag) throws  ParserConfigurationException, SAXException, IOException 
 	{
 		//TODO
@@ -124,7 +124,9 @@ public class countLine {
 		//lyl:修改为以下一行
 		GpsPoint p = new GpsPoint(_g.getJD()*3600000, _g.getWD()*3600000);
 		long t1 = System.currentTimeMillis();
+		//lyl:getNear返回一个HashMap<Long,Double>得到这一点附近的LineID以及到这条line的distance。
 		currentMap = nearLine.getNear(p);//计算
+		//lyl:getSnode返回一个HashMap<Long,String>,得到这一点附近的LineID以及对应的Snode
 		currentSnodes = nearLine.getSnode(p);
 		TimePicker.t1 += System.currentTimeMillis() - t1;
 		long t2 = System.currentTimeMillis();
@@ -137,7 +139,9 @@ public class countLine {
 			Snodes = currentSnodes;
 		}
 		else 
-		{		
+		{
+			//如果pastMap不为空，调用getConnection(_g)
+			//GetConnection返回一个HashMap<Long,Double>得到较为“可靠”的lineID和currentDistant，当返回不为空时，赋值给pastMap。
 			HashMap<Long, Double> _pastMap = getConnection(_g);
 			//对之前所有点的置信链路集合PastMap和当前点置信区间内的链路集合合并操作。
 			/*if (Long.parseLong(sdf.format(_g.getCurrentTime())) >= 120120401081940L && 
@@ -163,6 +167,8 @@ public class countLine {
 					}
 					System.out.println();
 				}*/
+			//getConnection()结果为空，代表两个点既不在同一条路链上又不在两条相连的路链上；
+			// 调用errorPoint，errorPoint中应该有插值算法，但是并没有实现
 			if (_pastMap.isEmpty())
 			{
 				if (errorFlag != 1)
@@ -195,8 +201,11 @@ public class countLine {
 	}
 		
 	//lyl:作用是什么？
+	//errorPoint函数本应该实现插值算法，在两个点所在路链无法相连的时候，
+	// 但是只是将所有两层的for循环将currentMap和pastMap中的点放到了list中
 	private void errorPrint(String path, GpsPointOfCar p) throws IOException
 	{
+
 		//System.out.println("3333333333333333333333333334");
 		errorNum++;
 		FileWriter fileWriter = new FileWriter(path, true);
