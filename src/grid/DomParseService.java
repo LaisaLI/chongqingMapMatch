@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;   
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;  
 import javax.xml.parsers.DocumentBuilderFactory;  
@@ -32,6 +33,8 @@ public class DomParseService {
     private NodeList childNodes = null;
     private HashMap<Long, Double> nearLineSet = null;
     private HashMap<Long, String> lineNodeMap = null;
+	//建立一个存储所找到的nearLine与正北方向夹角的hashMap，
+	private HashMap<Long,Double> nearLineAngleSet = null;
 	public DomParseService(String _path) throws ParserConfigurationException, SAXException, IOException
 	{
 		this.path = _path;
@@ -49,6 +52,8 @@ public class DomParseService {
 		long t = System.currentTimeMillis();
 		nearLineSet = new HashMap<Long,Double>();
 		lineNodeMap = new HashMap<Long,String>();
+		nearLineAngleSet = new HashMap<Long,Double>();
+
 		getNearLine(SID, p);
 		int X = SID % NUM_OF_SUBMAP;
 		int Y = SID / NUM_OF_SUBMAP;
@@ -59,6 +64,12 @@ public class DomParseService {
 			}
 		if (YOff != 0 && Y + YOff >= 0 && Y + YOff < NUM_OF_SUBMAP) getNearLine(X + (Y + YOff) * NUM_OF_SUBMAP, p);
 		TimePicker.t3 += System.currentTimeMillis() - t;
+//		if(p.getX()==106.56768025267){
+//			for (Iterator<Long> it = nearLineSet.keySet().iterator(); it.hasNext();){
+//				long lindId = it.next();
+//				System.out.println("line:"+lindId+","+nearLineSet.get(lindId));
+//			}
+//		}
 		return nearLineSet;
 	}
 	
@@ -82,20 +93,31 @@ public class DomParseService {
             	if (distance <= MAX_DISTANCE && (!nearLineSet.containsKey(slk.getID()) || nearLineSet.get(slk.getID()) > distance))
             	{
             		String node = null;
+					//用于存储该link对应的角度，双向的用负数表示，单向的用正数表示
+					double angle = 10000;
             		nearLineSet.put(slk.getID(), distance);
-            		if (slk.getDirection() == 1)
+            		if (slk.getDirection() == 0||slk.getDirection() == 1)
             		{
             			node = slk.getSnodeID() + " " + slk.getEnodeID();
+						angle = Util.getAngle(slk.getStartPoint(),slk.getEndPoint());
+						//如果是双向的，则为负数
+						if(angle>180) angle-=180;
+						angle = -angle;
+						if(angle==0) angle = -180;
             		}
             		else if (slk.getDirection() == 2)
             		{
             			node = slk.getEnodeID();
+						angle = Util.getAngle(slk.getStartPoint(),slk.getEndPoint());
             		}
             		else 
             		{
             			node = slk.getSnodeID();
+						angle = Util.getAngle(slk.getEndPoint(),slk.getStartPoint());
             		}
+
             		lineNodeMap.put(slk.getID(), node);
+					nearLineAngleSet.put(slk.getID(),angle);
             		//if (Double.valueOf(p.getX()).equals(419262148.0/3600000) && Double.valueOf(p.getY()).equals(143964257.0/3600000))
             		//	System.out.println(slk.getID() + " " + node);
             			
@@ -109,6 +131,14 @@ public class DomParseService {
 	public HashMap<Long, String>getSnode()
 	{
 		return lineNodeMap;
+	}
+
+	/**
+	 * 返回linkSet对应的AngleSet
+	 * @return nearLineAngleSet 返回linkSet对应的AngleSet
+	 */
+	public HashMap<Long,Double> getAngleSet(){
+		return nearLineAngleSet;
 	}
 	
 	/*public final void openFile(int oldFunction){

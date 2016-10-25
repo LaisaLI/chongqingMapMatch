@@ -62,6 +62,8 @@ public class Nearline {
 		}
 		//if (grid == null) System.out.println(gridID + " " + preGridID);
 		int subMapID = grid.subMapIdOfPoint(p);
+
+
 		return dom.getNear(subMapID, p, grid.getOff(p, 'X'), grid.getOff(p, 'Y'));
 		
 	}
@@ -70,6 +72,12 @@ public class Nearline {
 	{
 		if (JGrid.isInMap(p) == 0) return new HashMap<Long, String>();
 		else return dom.getSnode();
+	}
+
+	public HashMap<Long, Double>getAngleSet(GpsPoint p)
+	{
+		if (JGrid.isInMap(p) == 0) return new HashMap<Long, Double>();
+		else return dom.getAngleSet();
 	}
 	
 	

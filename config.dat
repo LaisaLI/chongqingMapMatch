@@ -1,4 +1,4 @@
-./Data/chongqingmapindex.txt
-./Data/chongqingNextLineResult.txt
+./Data/chongqingNextLineIndexWithLonNLat.txt
+./Data/chongqingNextLineResultWithLonNLat.txt
 ./Data/chongqingsubmap/submap
 ./testoutput1/

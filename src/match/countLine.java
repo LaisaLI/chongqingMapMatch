@@ -23,6 +23,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import grid.Util;
 import org.xml.sax.SAXException;
 
 
@@ -45,7 +46,9 @@ public class countLine {
 	private HashMap<Long, Integer> lineEnter = null;//
 	private HashMap<Long, String> Snodes = null;
 	private HashMap<Long, String> currentSnodes = null;
-	private String carId = null; 
+	private HashMap<Long, Double> currentAngles = null;
+	private HashMap<Long, Double> pastAngles = null;
+	private String carId = null;
 	private String beginTime = null;
 	private String endTime = null;
 	private NextLineOper nloper = null;
@@ -128,6 +131,10 @@ public class countLine {
 		currentMap = nearLine.getNear(p);//计算
 		//lyl:getSnode返回一个HashMap<Long,String>,得到这一点附近的LineID以及对应的Snode
 		currentSnodes = nearLine.getSnode(p);
+		if(currentAngles!=null){
+			pastAngles = currentAngles;
+		}
+		currentAngles = nearLine.getAngleSet(p);
 		TimePicker.t1 += System.currentTimeMillis() - t1;
 		long t2 = System.currentTimeMillis();
 		if (currentMap.isEmpty()) return;
@@ -137,11 +144,13 @@ public class countLine {
 			//System.out.println("PastMap is null in the time of " + g.getCurrentTime());
 			pastMap = currentMap;
 			Snodes = currentSnodes;
+//			pastAngles = currentAngles;
 		}
 		else 
 		{
 			//如果pastMap不为空，调用getConnection(_g)
 			//GetConnection返回一个HashMap<Long,Double>得到较为“可靠”的lineID和currentDistant，当返回不为空时，赋值给pastMap。
+			//System.out.println(currentPoint.getCurrentTime());
 			HashMap<Long, Double> _pastMap = getConnection(_g);
 			//对之前所有点的置信链路集合PastMap和当前点置信区间内的链路集合合并操作。
 			/*if (Long.parseLong(sdf.format(_g.getCurrentTime())) >= 120120401081940L && 
@@ -227,12 +236,17 @@ public class countLine {
 			long s = itp.next();
 			for (Iterator<Long> itc = currentMap.keySet().iterator(); itc.hasNext();)
 			{
-				
 				LineConnect lct = new LineConnect();
 				long e = itc.next();
-				lct.set(s, e, p.getCurrentTime(), null);
-				lct.errorSymbol = errorNum;
-				list.add(lct);
+//				if(isInterAngleSmall(currentAngles.get(e)))
+//				{
+
+					lct.set(s, e, p.getCurrentTime(), null);
+					lct.errorSymbol = errorNum;
+					list.add(lct);
+//				}
+				
+
 				
 			}
 		}
@@ -316,6 +330,8 @@ public class countLine {
 		list.clear();
 		if (pastMap != null) pastMap.clear();
 		if (currentMap != null) currentMap.clear();
+		if (pastAngles != null) pastAngles.clear();
+		if (currentAngles != null) currentAngles.clear();
 		this.lineEnter.clear();
 		TimePicker.t7 += System.currentTimeMillis() - t0;
 		
@@ -326,6 +342,7 @@ public class countLine {
 	public HashMap<Long, Double> getConnection(GpsPointOfCar _g)
 	{
 		//int debugInhm = 0;
+		//lyl:current 中包含
 		HashMap<Long, Double> current = new HashMap<Long, Double>(currentMap.size());
 		//HashMap<Long, String> nextSnodes = new HashMap<Long, String>();
 		for (Iterator<Long> it = pastMap.keySet().iterator(); it.hasNext();)
@@ -336,8 +353,13 @@ public class countLine {
 			
 			if (currentMap.containsKey(lineId))
 			{
-				double currentDistant = currentMap.get(lineId) + pastMap.get(lineId);
-				current.put(lineId, currentDistant);
+				if(isInterAngleSmall(currentAngles.get(lineId)))
+				{
+					double currentDistant = currentMap.get(lineId) + pastMap.get(lineId);
+					current.put(lineId, currentDistant);
+				}
+
+
 			}
 			//System.out.println("Cycle in getNextLine1 " + System.currentTimeMillis());
 		}
@@ -365,12 +387,17 @@ public class countLine {
 							double currentDistant = pastMap.get(lineId) + currentMap.get(next);
 							if (!current.containsKey(next) || currentDistant < current.get(next))
 							{
-								current.put(next, currentDistant);
-								lineEnter.put(next, list.size());
-								LineConnect lct = new LineConnect();
-								lct.set(lineId, next, _g.getCurrentTime(), node);
-								list.add(lct);
-								//nloper.remove(Snodes.get(lineId));
+								//lyl:添加一个路链方向和车辆方向的判断
+								if(isInterAngleSmall(currentAngles.get(next)))
+								{
+									current.put(next, currentDistant);
+									lineEnter.put(next, list.size());
+									LineConnect lct = new LineConnect();
+									lct.set(lineId, next, _g.getCurrentTime(), node);
+									list.add(lct);
+									//nloper.remove(Snodes.get(lineId));
+								}
+
 							}
 						}
 					}
@@ -390,14 +417,19 @@ public class countLine {
 					if (next != lineId && currentMap.containsKey(next))
 					{
 						double currentDistant = pastMap.get(lineId) + currentMap.get(next);
-						if (!pastMap.containsKey(next) || currentDistant < current.get(next))
+//						if(pastMap == null)System.out.println("Wrong!!");
+//						if(current.get(next) == null)System.out.println("Wrong!!");
+//						if (!pastMap.containsKey(next) || !current.containsKey(next)||(current.containsKey(next)&&currentDistant < current.get(next)))
+						if (!current.containsKey(next)||currentDistant < current.get(next))
 						{
-							current.put(next, currentDistant);
-							lineEnter.put(next, list.size());
-							LineConnect lct = new LineConnect();
-							lct.set(lineId, next, _g.getCurrentTime(), node);
-							//nloper.remove(Snodes.get(lineId));
-							list.add(lct);
+							if(isInterAngleSmall(currentAngles.get(next))) {
+								current.put(next, currentDistant);
+								lineEnter.put(next, list.size());
+								LineConnect lct = new LineConnect();
+								lct.set(lineId, next, _g.getCurrentTime(), node);
+								//nloper.remove(Snodes.get(lineId));
+								list.add(lct);
+							}
 						}
 					}
 				}
@@ -407,6 +439,76 @@ public class countLine {
 		//System.out.println("Cycle in countLine.add " + debugInhm + " "+ System.currentTimeMillis());
 		
 		return current;
+	}
+
+
+//	public double getInterAngle(double angleA,double angleB,double pointInterAngle){
+//		double interAngle = 0;
+//		if(angleA<0){
+//			angleA = - angleA;
+//			if(angleB<0){
+//				angleB = -angleB
+//			}
+//			double temp1 = angleA-angleB;
+//			double temp2 = Math.abs(angleA-angleB+180);
+//			if(temp1<temp2) interAngle = temp1;
+//			else interAngle = temp2;
+//		}
+//		else{
+//			interAngle = angleA-angleB;
+//		}
+//	}
+
+	public  boolean isInterAngleSmall(double linkAngle){
+		if(pastPoint!=null&&currentPoint!=null){
+			GpsPoint pCarA = new GpsPoint(pastPoint.getJD()*3600000,pastPoint.getWD()*3600000) ;
+			GpsPoint pCarB = new GpsPoint(currentPoint.getJD()*3600000,currentPoint.getWD()*3600000) ;
+
+			double carAngle = Util.getAngle(pCarA,pCarB);
+			double interAngle = 0;
+			if(linkAngle<0){
+				double temp1 = -linkAngle;
+				double temp2 = (-linkAngle+180)%360;
+				if( getInterAngle(temp1,carAngle)<getInterAngle(temp2,carAngle)){
+					interAngle = getInterAngle(temp1,carAngle);
+				}
+				else{
+					interAngle = getInterAngle(temp2,carAngle);
+				}
+			}
+			else{
+				interAngle = getInterAngle(linkAngle,carAngle);
+			}
+
+			if(interAngle>60)
+				return false;
+		}
+
+			return true;
+
+//		if(linkAngle<0){
+//			linkAngle = - linkAngle;
+//			double temp1 = Math.abs(linkAngle-pointInterAngle);
+//			double temp2 = Math.abs(linkAngle-pointInterAngle+180);
+//			if(temp1<temp2) interAngle = temp1;
+//			else interAngle = temp2;
+//		}
+//		else{
+//			interAngle = Math.abs(linkInterAngle-pointInterAngle);
+//		}
+//		if(interAngle>180) interAngle = 360-interAngle;
+//		if(interAngle>30) return false;
+//		else return true;
+	}
+
+	double getInterAngle(double angleA,double angleB){
+		double temp1 = Math.abs(angleA-angleB);
+		double temp2 = 360-temp1;
+		if(temp1<temp2){
+			return temp1;
+		}
+		else
+			return temp2;
 	}
 	/*
 	public HashMap<Long, Double> getConnection(HashMap<Long, Double> _past, HashMap<Long, Double> _current, GpsPointOfCar currentPoint, long _maxDistant)
